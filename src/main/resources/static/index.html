@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Transformador de Partituras</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 2rem;
+      background-color: #f5f5f5;
+    }
+
+    .card {
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      padding: 2rem;
+      max-width: 500px;
+      margin: auto;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    h2 {
+      text-align: center;
+    }
+
+    label, input, select, button {
+      margin-top: 1rem;
+      width: 100%;
+      padding: 0.5rem;
+      font-size: 1rem;
+    }
+
+    button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    #resultado {
+      margin-top: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>Transformador de Partituras</h2>
+
+    <label for="archivo">Sube tu partitura (.mxl, .mid, .mscz, .pdf):</label>
+    <input type="file" id="archivo" accept=".mxl,.mid,.mscz,.pdf" required>
+
+    <label for="modo">Modo:</label>
+    <select id="modo">
+      <option value="predeterminado">Instrumento predeterminado</option>
+      <option value="personalizado">Configuración personalizada</option>
+    </select>
+
+    <div id="instrumentoContainer">
+      <label for="instrumento">Instrumento:</label>
+      <select id="instrumento">
+        <option value="clarinete">Clarinete (Bb)</option>
+        <option value="saxo_alto">Saxo Alto (Eb)</option>
+        <option value="tuba">Tuba (Fa)</option>
+      </select>
+    </div>
+
+    <div id="customContainer" style="display:none;">
+      <label for="transposicion">Transposición (semitonos):</label>
+      <input type="number" id="transposicion" value="0">
+
+      <label for="clave">Clave musical:</label>
+      <select id="clave">
+        <option value="G">Clave de Sol</option>
+        <option value="F">Clave de Fa</option>
+        <option value="C">Clave de Do</option>
+      </select>
+    </div>
+
+    <button onclick="enviar()">Transformar</button>
+
+    <div id="resultado"></div>
+  </div>
+
+  <script>
+    const modo = document.getElementById('modo');
+    const instrumentoContainer = document.getElementById('instrumentoContainer');
+    const customContainer = document.getElementById('customContainer');
+
+    modo.addEventListener('change', () => {
+      if (modo.value === 'predeterminado') {
+        instrumentoContainer.style.display = 'block';
+        customContainer.style.display = 'none';
+      } else {
+        instrumentoContainer.style.display = 'none';
+        customContainer.style.display = 'block';
+      }
+    });
+
+    async function enviar() {
+      const archivo = document.getElementById('archivo').files[0];
+      const resultado = document.getElementById("resultado");
+      resultado.innerHTML = "Procesando...";
+
+      if (!archivo) {
+        alert('Por favor sube un archivo.');
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("archivo", archivo);
+      formData.append("modo", modo.value);
+
+      if (modo.value === "predeterminado") {
+        formData.append("instrumento", document.getElementById("instrumento").value);
+      } else {
+        formData.append("transposicion", document.getElementById("transposicion").value);
+        formData.append("clave", document.getElementById("clave").value);
+      }
+
+      try {
+        const respuesta = await fetch("https://TU_BACKEND_URL/api/transformar", {
+          method: "POST",
+          body: formData
+        });
+
+        if (respuesta.ok) {
+          const data = await respuesta.json();
+          resultado.innerHTML = `
+            <p>Transformación exitosa. Descargas:</p>
+            <ul>
+              ${data.archivos.map(a => `<li><a href="${a.url}" target="_blank">${a.nombre}</a></li>`).join("")}
+            </ul>
+          `;
+        } else {
+          resultado.textContent = "Error en la transformación.";
+        }
+      } catch (err) {
+        resultado.textContent = "Error al conectar con el servidor.";
+      }
+    }
+  </script>
+</body>
+</html>
