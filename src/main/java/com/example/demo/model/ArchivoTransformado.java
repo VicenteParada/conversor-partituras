@@ -4,16 +4,22 @@ public class ArchivoTransformado {
 
     private String nombre;            // Nombre del archivo generado (por ejemplo, "partitura_transpuesta.xml")
     private String tipoContenido;    // Tipo MIME (por ejemplo, "application/vnd.recordare.musicxml+xml")
-    private byte[] contenido;        // Contenido binario del archivo
+    private byte[] contenido;        // Contenido binario del archivo (opcional, puede omitirse en la respuesta)
+    private String url;              // URL para descargar el archivo
 
-    // Constructor vacío
     public ArchivoTransformado() {}
 
-    // Constructor completo
     public ArchivoTransformado(String nombre, String tipoContenido, byte[] contenido) {
         this.nombre = nombre;
         this.tipoContenido = tipoContenido;
         this.contenido = contenido;
+    }
+
+    // Constructor alternativo con URL (sin contenido si no es necesario enviarlo)
+    public ArchivoTransformado(String nombre, String tipoContenido, String url) {
+        this.nombre = nombre;
+        this.tipoContenido = tipoContenido;
+        this.url = url;
     }
 
     // Getters y setters
@@ -39,5 +45,13 @@ public class ArchivoTransformado {
 
     public void setContenido(byte[] contenido) {
         this.contenido = contenido;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
     }
 }
